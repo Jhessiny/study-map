@@ -1,0 +1,6 @@
+export { DomainError } from '@/shared/errors/domain-error'
+export { NotFoundError } from '@/shared/errors/not-found-error'
+export { AccessDeniedError } from '@/shared/errors/access-denied-error'
+export { InvalidCredentialsError } from '@/shared/errors/invalid-credentials-error'
+export { ValidationError } from '@/shared/errors/validation-error'
+export { UnexpectedError } from '@/shared/errors/unexpected-error'
