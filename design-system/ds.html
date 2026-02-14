@@ -1,0 +1,885 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Student Collaboration App - Design System Demo</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    /* Design System Variables */
+    :root {
+      /* Primary Colors - Deep Teal */
+      --primary-50: #F0FDFB;
+      --primary-100: #CCFBF0;
+      --primary-200: #99F6E0;
+      --primary-300: #5EEAD4;
+      --primary-400: #2DD4BF;
+      --primary-500: #14B8A6;
+      --primary-600: #0D9488;
+      --primary-700: #0F766E;
+      --primary-800: #115E59;
+      --primary-900: #134E4A;
+      
+      /* Secondary Colors - Powder Blush */
+      --secondary-50: #FFF5F7;
+      --secondary-100: #FFE4E8;
+      --secondary-200: #FFCCD5;
+      --secondary-300: #FFB3C1;
+      --secondary-400: #FF99AD;
+      --secondary-500: #FFA69E;
+      --secondary-600: #FF8A80;
+      --secondary-700: #FF6E63;
+      --secondary-800: #E85850;
+      --secondary-900: #CC4540;
+      
+      /* Accent Colors */
+      --accent-eggshell: #FAF3DD;
+      --accent-eggshell-dark: #F0E9CD;
+      
+      --accent-sky-50: #F5FBFD;
+      --accent-sky-100: #EBF7FB;
+      --accent-sky-200: #D7EFF7;
+      --accent-sky-300: #C3E7F3;
+      --accent-sky-400: #AFDFEF;
+      --accent-sky-500: #AED9E0;
+      --accent-sky-600: #8FC9D6;
+      --accent-sky-700: #70B9CC;
+      --accent-sky-800: #51A9C2;
+      --accent-sky-900: #3299B8;
+      
+      --accent-slate-50: #F2F3F5;
+      --accent-slate-100: #E5E7EB;
+      --accent-slate-200: #CBCFD6;
+      --accent-slate-300: #B1B7C2;
+      --accent-slate-400: #979FAD;
+      --accent-slate-500: #5E6472;
+      --accent-slate-600: #4B515E;
+      --accent-slate-700: #383E49;
+      --accent-slate-800: #252B35;
+      --accent-slate-900: #121820;
+      
+      /* Success, Warning, Error */
+      --success-50: #F0FDF4;
+      --success-100: #DCFCE7;
+      --success-500: #22C55E;
+      --success-600: #16A34A;
+      --success-700: #15803D;
+      
+      --warning-50: #FFFBEB;
+      --warning-100: #FEF3C7;
+      --warning-500: #F59E0B;
+      --warning-600: #D97706;
+      
+      --error-50: #FEF2F2;
+      --error-100: #FEE2E2;
+      --error-500: #EF4444;
+      --error-600: #DC2626;
+      
+      /* Neutral Palette */
+      --neutral-50: #FAFAFA;
+      --neutral-100: #F5F5F5;
+      --neutral-200: #E5E5E5;
+      --neutral-300: #D4D4D4;
+      --neutral-400: #A3A3A3;
+      --neutral-500: #737373;
+      --neutral-600: #525252;
+      --neutral-700: #404040;
+      --neutral-800: #262626;
+      --neutral-900: #171717;
+      
+      /* Typography */
+      --text-xs: 0.75rem;
+      --text-sm: 0.875rem;
+      --text-base: 1rem;
+      --text-lg: 1.125rem;
+      --text-xl: 1.25rem;
+      --text-2xl: 1.563rem;
+      --text-3xl: 1.953rem;
+      --text-4xl: 2.441rem;
+      --text-5xl: 3.052rem;
+      
+      --font-normal: 400;
+      --font-medium: 500;
+      --font-semibold: 600;
+      --font-bold: 700;
+      --font-extrabold: 800;
+      
+      --leading-tight: 1.25;
+      --leading-snug: 1.375;
+      --leading-normal: 1.5;
+      --leading-relaxed: 1.625;
+      
+      /* Spacing */
+      --space-0: 0;
+      --space-1: 0.25rem;
+      --space-2: 0.5rem;
+      --space-3: 0.75rem;
+      --space-4: 1rem;
+      --space-5: 1.25rem;
+      --space-6: 1.5rem;
+      --space-8: 2rem;
+      --space-10: 2.5rem;
+      --space-12: 3rem;
+      --space-16: 4rem;
+      --space-20: 5rem;
+      --space-24: 6rem;
+      
+      /* Border Radius */
+      --radius-none: 0;
+      --radius-sm: 0.25rem;
+      --radius-base: 0.5rem;
+      --radius-md: 0.75rem;
+      --radius-lg: 1rem;
+      --radius-xl: 1.5rem;
+      --radius-full: 9999px;
+      
+      /* Shadows */
+      --shadow-xs: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+      --shadow-sm: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px -1px rgba(0, 0, 0, 0.1);
+      --shadow-base: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.1);
+      --shadow-md: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -4px rgba(0, 0, 0, 0.1);
+      --shadow-lg: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
+      --shadow-xl: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+      
+      --shadow-primary: 0 10px 25px -5px rgba(20, 184, 166, 0.3);
+      --shadow-secondary: 0 10px 25px -5px rgba(255, 166, 158, 0.3);
+      
+      /* Gradients */
+      --gradient-primary: linear-gradient(135deg, var(--primary-400) 0%, var(--primary-600) 100%);
+      --gradient-playful: linear-gradient(135deg, var(--primary-400) 0%, var(--secondary-400) 100%);
+      --gradient-subtle: linear-gradient(180deg, var(--primary-50) 0%, white 100%);
+    }
+    
+    /* Base Styles */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      font-size: var(--text-base);
+      color: var(--neutral-600);
+      background: var(--neutral-50);
+      line-height: var(--leading-normal);
+    }
+    
+    /* Typography */
+    h1, h2, h3, h4, h5, h6 {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      color: var(--neutral-800);
+    }
+    
+    h1 {
+      font-size: var(--text-4xl);
+      font-weight: var(--font-bold);
+      line-height: var(--leading-tight);
+      margin-bottom: var(--space-4);
+    }
+    
+    h2 {
+      font-size: var(--text-3xl);
+      font-weight: var(--font-bold);
+      line-height: var(--leading-tight);
+      margin-bottom: var(--space-3);
+    }
+    
+    h3 {
+      font-size: var(--text-2xl);
+      font-weight: var(--font-semibold);
+      line-height: var(--leading-snug);
+      margin-bottom: var(--space-3);
+    }
+    
+    h4 {
+      font-size: var(--text-xl);
+      font-weight: var(--font-semibold);
+      color: var(--neutral-700);
+      margin-bottom: var(--space-2);
+    }
+    
+    /* Layout */
+    .container {
+      max-width: 1280px;
+      margin: 0 auto;
+      padding: var(--space-8) var(--space-6);
+    }
+    
+    .section {
+      margin-bottom: var(--space-16);
+    }
+    
+    .grid {
+      display: grid;
+      gap: var(--space-6);
+    }
+    
+    .grid-2 {
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    }
+    
+    .grid-3 {
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    }
+    
+    /* Header */
+    .header {
+      background: white;
+      border-bottom: 1px solid var(--neutral-200);
+      padding: var(--space-6) 0;
+      margin-bottom: var(--space-8);
+      box-shadow: var(--shadow-sm);
+    }
+    
+    .header-content {
+      max-width: 1280px;
+      margin: 0 auto;
+      padding: 0 var(--space-6);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    
+    .logo {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      font-size: var(--text-2xl);
+      font-weight: var(--font-bold);
+      background: var(--gradient-playful);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    
+    /* Buttons */
+    .btn {
+      padding: var(--space-3) var(--space-6);
+      border-radius: var(--radius-sm);
+      font-weight: var(--font-semibold);
+      font-size: var(--text-base);
+      border: none;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      display: inline-flex;
+      align-items: center;
+      gap: var(--space-2);
+      text-decoration: none;
+    }
+    
+    .btn-primary {
+      background: var(--primary-500);
+      color: white;
+      box-shadow: var(--shadow-sm);
+    }
+    
+    .btn-primary:hover {
+      background: var(--primary-600);
+      box-shadow: var(--shadow-md);
+      transform: translateY(-1px);
+    }
+    
+    .btn-primary:active {
+      background: var(--primary-700);
+      transform: translateY(0);
+    }
+    
+    .btn-secondary {
+      background: var(--secondary-500);
+      color: white;
+      box-shadow: var(--shadow-sm);
+    }
+    
+    .btn-secondary:hover {
+      background: var(--secondary-600);
+      box-shadow: var(--shadow-md);
+      transform: translateY(-1px);
+    }
+    
+    .btn-ghost {
+      background: transparent;
+      color: var(--primary-600);
+      border: 2px solid var(--primary-200);
+    }
+    
+    .btn-ghost:hover {
+      background: var(--primary-50);
+      border-color: var(--primary-300);
+    }
+    
+    .btn-sm {
+      padding: var(--space-2) var(--space-4);
+      font-size: var(--text-sm);
+    }
+    
+    .btn-group {
+      display: flex;
+      gap: var(--space-3);
+      flex-wrap: wrap;
+    }
+    
+    /* Cards */
+    .card {
+      background: white;
+      border-radius: var(--radius-base);
+      padding: var(--space-6);
+      box-shadow: var(--shadow-sm);
+      border: 1px solid var(--neutral-100);
+      transition: all 0.2s ease;
+    }
+    
+    .card:hover {
+      box-shadow: var(--shadow-md);
+      transform: translateY(-2px);
+    }
+    
+    .card-playful {
+      background: linear-gradient(135deg, var(--primary-50) 0%, var(--secondary-50) 100%);
+      border: 2px solid var(--primary-100);
+    }
+    
+    .card-header {
+      margin-bottom: var(--space-4);
+    }
+    
+    .card-title {
+      font-size: var(--text-xl);
+      font-weight: var(--font-semibold);
+      color: var(--neutral-800);
+      margin-bottom: var(--space-2);
+    }
+    
+    .card-subtitle {
+      font-size: var(--text-sm);
+      color: var(--neutral-500);
+    }
+    
+    /* Form Elements */
+    .form-group {
+      margin-bottom: var(--space-4);
+    }
+    
+    .label {
+      display: block;
+      font-size: var(--text-sm);
+      font-weight: var(--font-medium);
+      color: var(--neutral-700);
+      margin-bottom: var(--space-2);
+    }
+    
+    .input {
+      width: 100%;
+      padding: var(--space-3) var(--space-4);
+      border: 2px solid var(--neutral-200);
+      border-radius: var(--radius-sm);
+      font-size: var(--text-base);
+      color: var(--neutral-700);
+      background: white;
+      transition: all 0.2s ease;
+      font-family: inherit;
+    }
+    
+    .input:focus {
+      outline: none;
+      border-color: var(--primary-400);
+      box-shadow: 0 0 0 3px rgba(20, 184, 166, 0.1);
+    }
+    
+    .input::placeholder {
+      color: var(--neutral-400);
+    }
+    
+    /* Badges */
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      padding: var(--space-1) var(--space-3);
+      border-radius: var(--radius-full);
+      font-size: var(--text-xs);
+      font-weight: var(--font-medium);
+    }
+    
+    .badge-primary {
+      background: var(--primary-100);
+      color: var(--primary-700);
+    }
+    
+    .badge-secondary {
+      background: var(--secondary-100);
+      color: var(--secondary-700);
+    }
+    
+    .badge-success {
+      background: var(--success-100);
+      color: var(--success-700);
+    }
+    
+    .badge-warning {
+      background: var(--warning-100);
+      color: var(--warning-600);
+    }
+    
+    .badge-error {
+      background: var(--error-100);
+      color: var(--error-600);
+    }
+    
+    /* Avatars */
+    .avatar {
+      width: 40px;
+      height: 40px;
+      border-radius: var(--radius-full);
+      border: 2px solid white;
+      box-shadow: var(--shadow-sm);
+      background: var(--gradient-primary);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-weight: var(--font-semibold);
+    }
+    
+    .avatar-sm {
+      width: 32px;
+      height: 32px;
+      font-size: var(--text-xs);
+    }
+    
+    .avatar-lg {
+      width: 56px;
+      height: 56px;
+      font-size: var(--text-lg);
+    }
+    
+    .avatar-group {
+      display: flex;
+      align-items: center;
+      margin-left: calc(var(--space-2) * -1);
+    }
+    
+    .avatar-group .avatar {
+      margin-left: calc(var(--space-3) * -1);
+    }
+    
+    /* Color Swatches */
+    .color-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+      gap: var(--space-4);
+      margin-bottom: var(--space-6);
+    }
+    
+    .color-swatch {
+      text-align: center;
+    }
+    
+    .color-box {
+      height: 80px;
+      border-radius: var(--radius-base);
+      margin-bottom: var(--space-2);
+      box-shadow: var(--shadow-sm);
+      border: 1px solid var(--neutral-200);
+    }
+    
+    .color-label {
+      font-size: var(--text-xs);
+      color: var(--neutral-600);
+      font-weight: var(--font-medium);
+    }
+    
+    /* Alert */
+    .alert {
+      padding: var(--space-4);
+      border-radius: var(--radius-sm);
+      border-left: 4px solid;
+      margin-bottom: var(--space-4);
+    }
+    
+    .alert-success {
+      background: var(--success-50);
+      border-color: var(--success-500);
+      color: var(--success-700);
+    }
+    
+    .alert-warning {
+      background: var(--warning-50);
+      border-color: var(--warning-500);
+      color: var(--warning-600);
+    }
+    
+    .alert-error {
+      background: var(--error-50);
+      border-color: var(--error-500);
+      color: var(--error-600);
+    }
+    
+    /* Hero Section */
+    .hero {
+      background: var(--gradient-subtle);
+      padding: var(--space-16) var(--space-6);
+      text-align: center;
+      border-radius: var(--radius-xl);
+      margin-bottom: var(--space-12);
+    }
+    
+    .hero h1 {
+      font-size: var(--text-4xl);
+      margin-bottom: var(--space-4);
+    }
+    
+    .hero p {
+      font-size: var(--text-lg);
+      color: var(--neutral-600);
+      max-width: 600px;
+      margin: 0 auto var(--space-6);
+    }
+    
+    /* Utility Classes */
+    .text-center { text-align: center; }
+    .mb-4 { margin-bottom: var(--space-4); }
+    .mb-6 { margin-bottom: var(--space-6); }
+    .mb-8 { margin-bottom: var(--space-8); }
+    .mt-8 { margin-top: var(--space-8); }
+    .flex { display: flex; }
+    .items-center { align-items: center; }
+    .justify-between { justify-content: space-between; }
+    .gap-4 { gap: var(--space-4); }
+    
+    @media (prefers-reduced-motion: reduce) {
+      * {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+      }
+    }
+  </style>
+</head>
+<body>
+  
+  <!-- Header -->
+  <header class="header">
+    <div class="header-content">
+      <div class="logo">StudyTogether</div>
+      <button class="btn btn-primary btn-sm">Get Started</button>
+    </div>
+  </header>
+  
+  <div class="container">
+    
+    <!-- Hero Section -->
+    <div class="hero">
+      <h1>Student Collaboration Design System</h1>
+      <p>A light, approachable design system for building collaborative learning experiences</p>
+      <div class="btn-group" style="justify-content: center;">
+        <button class="btn btn-primary">View Components</button>
+        <button class="btn btn-ghost">Read Documentation</button>
+      </div>
+    </div>
+    
+    <!-- Colors Section -->
+    <section class="section">
+      <h2>Color Palette</h2>
+      <p class="mb-6" style="color: var(--neutral-600);">Fresh and friendly colors that create an engaging learning environment</p>
+      
+      <h4>Primary Colors (Deep Teal)</h4>
+      <div class="color-grid mb-8">
+        <div class="color-swatch">
+          <div class="color-box" style="background: var(--primary-100);"></div>
+          <div class="color-label">Primary 100</div>
+        </div>
+        <div class="color-swatch">
+          <div class="color-box" style="background: var(--primary-300);"></div>
+          <div class="color-label">Primary 300</div>
+        </div>
+        <div class="color-swatch">
+          <div class="color-box" style="background: var(--primary-500);"></div>
+          <div class="color-label">Primary 500</div>
+        </div>
+        <div class="color-swatch">
+          <div class="color-box" style="background: var(--primary-700);"></div>
+          <div class="color-label">Primary 700</div>
+        </div>
+      </div>
+      
+      <h4>Secondary Colors (Powder Blush)</h4>
+      <div class="color-grid mb-8">
+        <div class="color-swatch">
+          <div class="color-box" style="background: var(--secondary-100);"></div>
+          <div class="color-label">Secondary 100</div>
+        </div>
+        <div class="color-swatch">
+          <div class="color-box" style="background: var(--secondary-300);"></div>
+          <div class="color-label">Secondary 300</div>
+        </div>
+        <div class="color-swatch">
+          <div class="color-box" style="background: var(--secondary-500);"></div>
+          <div class="color-label">Secondary 500</div>
+        </div>
+        <div class="color-swatch">
+          <div class="color-box" style="background: var(--secondary-700);"></div>
+          <div class="color-label">Secondary 700</div>
+        </div>
+      </div>
+      
+      <h4>Semantic Colors</h4>
+      <div class="color-grid">
+        <div class="color-swatch">
+          <div class="color-box" style="background: var(--success-500);"></div>
+          <div class="color-label">Success</div>
+        </div>
+        <div class="color-swatch">
+          <div class="color-box" style="background: var(--warning-500);"></div>
+          <div class="color-label">Warning</div>
+        </div>
+        <div class="color-swatch">
+          <div class="color-box" style="background: var(--error-500);"></div>
+          <div class="color-label">Error</div>
+        </div>
+      </div>
+    </section>
+    
+    <!-- Typography Section -->
+    <section class="section">
+      <h2>Typography</h2>
+      <p class="mb-6" style="color: var(--neutral-600);">Clean, readable type using Plus Jakarta Sans and Inter</p>
+      
+      <div class="card mb-6">
+        <h1>Heading 1 - Bold Display</h1>
+        <h2>Heading 2 - Section Title</h2>
+        <h3>Heading 3 - Card Title</h3>
+        <h4>Heading 4 - Subsection</h4>
+        <p style="margin-top: var(--space-4);">Body text using Inter at 16px with comfortable line height. This is designed for easy reading during long study sessions. The neutral color ensures good contrast without being harsh on the eyes.</p>
+        <p style="font-size: var(--text-sm); color: var(--neutral-500); margin-top: var(--space-3);">Small text for captions and metadata at 14px</p>
+      </div>
+    </section>
+    
+    <!-- Buttons Section -->
+    <section class="section">
+      <h2>Buttons</h2>
+      <p class="mb-6" style="color: var(--neutral-600);">Interactive elements with hover states and smooth animations</p>
+      
+      <div class="card">
+        <h4 class="mb-4">Button Variants</h4>
+        <div class="btn-group mb-6">
+          <button class="btn btn-primary">Primary Button</button>
+          <button class="btn btn-secondary">Secondary Button</button>
+          <button class="btn btn-ghost">Ghost Button</button>
+        </div>
+        
+        <h4 class="mb-4">Button Sizes</h4>
+        <div class="btn-group">
+          <button class="btn btn-primary">Regular Size</button>
+          <button class="btn btn-primary btn-sm">Small Size</button>
+        </div>
+      </div>
+    </section>
+    
+    <!-- Form Elements Section -->
+    <section class="section">
+      <h2>Form Elements</h2>
+      <p class="mb-6" style="color: var(--neutral-600);">Clean input fields with clear focus states</p>
+      
+      <div class="card">
+        <div class="form-group">
+          <label class="label">Project Name</label>
+          <input type="text" class="input" placeholder="Enter your project name...">
+        </div>
+        
+        <div class="form-group">
+          <label class="label">Description</label>
+          <input type="text" class="input" placeholder="What's your project about?">
+        </div>
+        
+        <button class="btn btn-primary">Create Project</button>
+      </div>
+    </section>
+    
+    <!-- Cards Section -->
+    <section class="section">
+      <h2>Cards</h2>
+      <p class="mb-6" style="color: var(--neutral-600);">Versatile containers for content with hover effects</p>
+      
+      <div class="grid grid-3">
+        <div class="card">
+          <div class="flex items-center justify-between mb-4">
+            <div class="avatar">JD</div>
+            <span class="badge badge-success">Active</span>
+          </div>
+          <h3 class="card-title">Biology Study Group</h3>
+          <p class="card-subtitle">5 members • Last active 2h ago</p>
+          <button class="btn btn-primary btn-sm mt-8" style="width: 100%;">Join Group</button>
+        </div>
+        
+        <div class="card card-playful">
+          <div class="flex items-center justify-between mb-4">
+            <div class="avatar">MS</div>
+            <span class="badge badge-warning">Pending</span>
+          </div>
+          <h3 class="card-title">Math Homework Help</h3>
+          <p class="card-subtitle">12 members • Last active 5m ago</p>
+          <button class="btn btn-secondary btn-sm mt-8" style="width: 100%;">Request Access</button>
+        </div>
+        
+        <div class="card">
+          <div class="flex items-center justify-between mb-4">
+            <div class="avatar">CS</div>
+            <span class="badge badge-primary">New</span>
+          </div>
+          <h3 class="card-title">Computer Science Project</h3>
+          <p class="card-subtitle">3 members • Created today</p>
+          <button class="btn btn-primary btn-sm mt-8" style="width: 100%;">Join Group</button>
+        </div>
+      </div>
+    </section>
+    
+    <!-- Badges Section -->
+    <section class="section">
+      <h2>Badges</h2>
+      <p class="mb-6" style="color: var(--neutral-600);">Status indicators and labels</p>
+      
+      <div class="card">
+        <div class="flex gap-4" style="flex-wrap: wrap;">
+          <span class="badge badge-primary">Primary</span>
+          <span class="badge badge-secondary">Featured</span>
+          <span class="badge badge-success">Completed</span>
+          <span class="badge badge-warning">Pending</span>
+          <span class="badge badge-error">Overdue</span>
+        </div>
+      </div>
+    </section>
+    
+    <!-- Avatars Section -->
+    <section class="section">
+      <h2>Avatars</h2>
+      <p class="mb-6" style="color: var(--neutral-600);">User representations with gradient backgrounds</p>
+      
+      <div class="card">
+        <h4 class="mb-4">Sizes</h4>
+        <div class="flex items-center gap-4 mb-6">
+          <div class="avatar avatar-sm">SM</div>
+          <div class="avatar">MD</div>
+          <div class="avatar avatar-lg">LG</div>
+        </div>
+        
+        <h4 class="mb-4">Avatar Group</h4>
+        <div class="avatar-group">
+          <div class="avatar">JD</div>
+          <div class="avatar">SM</div>
+          <div class="avatar">KL</div>
+          <div class="avatar">+5</div>
+        </div>
+      </div>
+    </section>
+    
+    <!-- Alerts Section -->
+    <section class="section">
+      <h2>Alerts</h2>
+      <p class="mb-6" style="color: var(--neutral-600);">Contextual feedback messages</p>
+      
+      <div class="alert alert-success">
+        <strong>Success!</strong> Your project has been created successfully.
+      </div>
+      
+      <div class="alert alert-warning">
+        <strong>Warning:</strong> Your session will expire in 5 minutes.
+      </div>
+      
+      <div class="alert alert-error">
+        <strong>Error:</strong> Unable to save changes. Please try again.
+      </div>
+    </section>
+    
+    <!-- Example Application -->
+    <section class="section">
+      <h2>Example: Project Dashboard</h2>
+      <p class="mb-6" style="color: var(--neutral-600);">See how these components work together</p>
+      
+      <div class="grid grid-2">
+        <div class="card">
+          <div class="card-header">
+            <div class="flex justify-between items-center">
+              <h3 class="card-title" style="margin: 0;">Active Projects</h3>
+              <span class="badge badge-primary">4</span>
+            </div>
+          </div>
+          
+          <div style="display: flex; flex-direction: column; gap: var(--space-4);">
+            <div style="padding: var(--space-3); background: var(--neutral-50); border-radius: var(--radius-sm); display: flex; justify-content: space-between; align-items: center;">
+              <div>
+                <div style="font-weight: var(--font-semibold); margin-bottom: var(--space-1);">Biology Final Report</div>
+                <div style="font-size: var(--text-sm); color: var(--neutral-500);">Due in 3 days</div>
+              </div>
+              <span class="badge badge-warning">In Progress</span>
+            </div>
+            
+            <div style="padding: var(--space-3); background: var(--neutral-50); border-radius: var(--radius-sm); display: flex; justify-content: space-between; align-items: center;">
+              <div>
+                <div style="font-weight: var(--font-semibold); margin-bottom: var(--space-1);">Math Problem Set #5</div>
+                <div style="font-size: var(--text-sm); color: var(--neutral-500);">Due tomorrow</div>
+              </div>
+              <span class="badge badge-error">Urgent</span>
+            </div>
+            
+            <div style="padding: var(--space-3); background: var(--neutral-50); border-radius: var(--radius-sm); display: flex; justify-content: space-between; align-items: center;">
+              <div>
+                <div style="font-weight: var(--font-semibold); margin-bottom: var(--space-1);">History Essay</div>
+                <div style="font-size: var(--text-sm); color: var(--neutral-500);">Due in 1 week</div>
+              </div>
+              <span class="badge badge-success">On Track</span>
+            </div>
+          </div>
+          
+          <button class="btn btn-ghost btn-sm mt-8" style="width: 100%;">View All Projects</button>
+        </div>
+        
+        <div class="card">
+          <div class="card-header">
+            <h3 class="card-title" style="margin: 0;">Study Groups</h3>
+          </div>
+          
+          <div style="display: flex; flex-direction: column; gap: var(--space-4);">
+            <div style="display: flex; align-items: center; gap: var(--space-3);">
+              <div class="avatar">BG</div>
+              <div style="flex: 1;">
+                <div style="font-weight: var(--font-semibold);">Biology Group</div>
+                <div style="font-size: var(--text-sm); color: var(--neutral-500);">8 members online</div>
+              </div>
+              <button class="btn btn-primary btn-sm">Join</button>
+            </div>
+            
+            <div style="display: flex; align-items: center; gap: var(--space-3);">
+              <div class="avatar">MH</div>
+              <div style="flex: 1;">
+                <div style="font-weight: var(--font-semibold);">Math Help Desk</div>
+                <div style="font-size: var(--text-sm); color: var(--neutral-500);">15 members online</div>
+              </div>
+              <button class="btn btn-primary btn-sm">Join</button>
+            </div>
+            
+            <div style="display: flex; align-items: center; gap: var(--space-3);">
+              <div class="avatar">CS</div>
+              <div style="flex: 1;">
+                <div style="font-weight: var(--font-semibold);">CS Study Room</div>
+                <div style="font-size: var(--text-sm); color: var(--neutral-500);">5 members online</div>
+              </div>
+              <button class="btn btn-primary btn-sm">Join</button>
+            </div>
+          </div>
+          
+          <button class="btn btn-secondary btn-sm mt-8" style="width: 100%;">Create New Group</button>
+        </div>
+      </div>
+    </section>
+    
+  </div>
+  
+  <footer style="background: white; border-top: 1px solid var(--neutral-200); padding: var(--space-8) 0; margin-top: var(--space-16); text-align: center; color: var(--neutral-500); font-size: var(--text-sm);">
+    <div class="container">
+      <p>Design System for Student Collaboration App • Light & Fresh Theme</p>
+      <p style="margin-top: var(--space-2);">Built with care for collaborative learning</p>
+    </div>
+  </footer>
+  
+</body>
+</html>
