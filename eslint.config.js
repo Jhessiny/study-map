@@ -53,11 +53,6 @@ export default defineConfig([
               position: 'before',
             },
             {
-              pattern: '@/ioc/**',
-              group: 'internal',
-              position: 'before',
-            },
-            {
               pattern: '@/store/**',
               group: 'internal',
               position: 'before',
