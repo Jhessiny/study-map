@@ -87,6 +87,10 @@ export default defineConfig([
         },
       ],
       'import/newline-after-import': 'error',
+      'react-refresh/only-export-components': [
+        'warn',
+        { allowConstantExport: true },
+      ],
     },
   },
   prettierConfig,
