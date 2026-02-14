@@ -53,37 +53,27 @@ export default defineConfig([
               position: 'before',
             },
             {
-              pattern: '@/store/**',
+              pattern: '@/domain/**',
               group: 'internal',
               position: 'before',
             },
             {
-              pattern: '@/app/domain/**',
+              pattern: '@/application/**',
               group: 'internal',
               position: 'before',
             },
             {
-              pattern: '@/app/application/**',
+              pattern: '@/infrastructure/**',
               group: 'internal',
               position: 'before',
             },
             {
-              pattern: '@/app/infra/**',
+              pattern: '@/shared/**',
               group: 'internal',
               position: 'before',
             },
             {
-              pattern: '@/app/main/**',
-              group: 'internal',
-              position: 'before',
-            },
-            {
-              pattern: '@/app/validation/**',
-              group: 'internal',
-              position: 'before',
-            },
-            {
-              pattern: '@/app/presentation/**',
+              pattern: '@/presentation/**',
               group: 'internal',
               position: 'after',
             },
