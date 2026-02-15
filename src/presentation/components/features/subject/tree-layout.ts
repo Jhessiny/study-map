@@ -50,7 +50,7 @@ function layoutSubtree(
   const totalChildrenWidth =
     children.length * childWidth + (children.length - 1) * childGap
   const startX = x + (width - totalChildrenWidth) / 2
-  const childY = y + height + height * 0.1
+  const childY = y + height + height * 5
 
   children.forEach((child, i) => {
     const childX = startX + i * (childWidth + childGap)
