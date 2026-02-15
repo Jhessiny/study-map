@@ -1,3 +1,5 @@
+import { useContext } from 'react'
+
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 
 import type {
@@ -5,27 +7,37 @@ import type {
   SignUpParams
 } from '@/domain/repositories/auth-repository'
 
-import { makeAuthRepository } from '@/infrastructure/factories/make-auth-repository'
+import { AuthContext } from '@/main/contexts/auth-context'
 
 import { queryAdapter } from '@/shared/utils/query-adapter'
 
 import { authKeys } from '@/presentation/hooks/query-keys'
 
-const repository = makeAuthRepository()
+const useAuthUseCases = () => {
+  const context = useContext(AuthContext)
+
+  if (!context) {
+    throw new Error('useAuthUseCases must be used within an AuthProvider')
+  }
+
+  return context
+}
 
 export const useSession = () => {
+  const { getSession } = useAuthUseCases()
+
   return useQuery({
     queryKey: authKeys.session,
-    queryFn: () => queryAdapter(repository.getSession())
+    queryFn: () => queryAdapter(getSession.execute())
   })
 }
 
 export const useSignIn = () => {
+  const { signIn } = useAuthUseCases()
   const queryClient = useQueryClient()
 
   return useMutation({
-    mutationFn: (params: SignInParams) =>
-      queryAdapter(repository.signInWithEmail(params)),
+    mutationFn: (params: SignInParams) => queryAdapter(signIn.execute(params)),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: authKeys.session })
     }
@@ -33,11 +45,11 @@ export const useSignIn = () => {
 }
 
 export const useSignUp = () => {
+  const { signUp } = useAuthUseCases()
   const queryClient = useQueryClient()
 
   return useMutation({
-    mutationFn: (params: SignUpParams) =>
-      queryAdapter(repository.signUp(params)),
+    mutationFn: (params: SignUpParams) => queryAdapter(signUp.execute(params)),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: authKeys.session })
     }
@@ -45,10 +57,11 @@ export const useSignUp = () => {
 }
 
 export const useSignOut = () => {
+  const { signOut } = useAuthUseCases()
   const queryClient = useQueryClient()
 
   return useMutation({
-    mutationFn: () => queryAdapter(repository.signOut()),
+    mutationFn: () => queryAdapter(signOut.execute()),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: authKeys.session })
     }
