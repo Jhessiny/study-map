@@ -68,6 +68,11 @@ export default defineConfig([
               position: 'before',
             },
             {
+              pattern: '@/main/**',
+              group: 'internal',
+              position: 'before',
+            },
+            {
               pattern: '@/shared/**',
               group: 'internal',
               position: 'before',
