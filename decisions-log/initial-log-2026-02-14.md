@@ -89,8 +89,70 @@
   - **Auto tag mapping**: variant determines the semantic HTML element (h1→`<h1>`, p→`<p>`, etc.)
 - **Reason**: Enforces typographic consistency, maps to the design system's Major Third (1.250) type scale
 
-### 12. Initial UI components
+### 12. Auth use cases in application layer
+
+- **Decision**: Add `GetSession`, `SignIn`, `SignUp`, `SignOut` use case classes in `application/use-cases/auth/`, each accepting `AuthRepository` via constructor injection; wire them through `infrastructure/factories/make-auth-use-cases.ts`; update `presentation/hooks/use-auth.ts` to consume use cases instead of the repository directly
+- **Reason**: Presentation hooks were importing `makeAuthRepository` directly from infrastructure, bypassing the application layer. This violates the clean architecture dependency flow (`presentation → application → domain`). Use cases provide a single-method boundary that keeps the hook layer decoupled from repository details
+
+### 13. Composition root in `main/` layer with React Context DI
+
+- **Decision**: Introduce a `main/` layer as the composition root. `main/providers/` wires infrastructure factories with application use cases and provides them to the component tree via React Context. `main/contexts/` defines typed contexts for each service domain. Presentation hooks consume use cases from context via `useContext`, depending only on application-layer types. Deleted `infrastructure/factories/make-auth-use-cases.ts` — wiring moved to `AuthProvider`.
+- **Reason**: `presentation/hooks/use-auth.ts` was importing `makeAuthUseCases` directly from `infrastructure/factories/`, creating a dependency from presentation to infrastructure. The `main/` composition root pattern keeps the dependency graph clean: `main/` is the only layer that crosses boundaries (importing from both infrastructure and application), while presentation depends only on context and application-layer types.
+
+### 14. Initial UI components
 
 - **Decision**: First component set — Button, Input, Card, Typography, NavigationMenu
 - **Source**: shadcn/ui registry for Button, Input, Card, NavigationMenu; custom for Typography
 - **Reason**: These cover the core interaction patterns needed for the app's first screens (auth, navigation, content display)
+
+### 15. Rename "concept" to "subject"
+
+- **Decision**: Rename the primary content entity from `Concept` to `Subject` across all layers (domain, application, infrastructure, main, presentation)
+- **Affected**: entity types, repository interfaces, use cases, factories, mock repositories, contexts, providers, hooks, query keys, components, pages
+- **Reason**: "Subject" better reflects the domain language — users study _subjects_ (Mathematics, Computer Science), not abstract "concepts"
+
+### 16. Environment configuration
+
+- **Decision**: Add `.env.example` with `VITE_SUPABASE_URL` and `VITE_SUPABASE_ANON_KEY`; update `.gitignore` with `.env`, `.env.local`, `.env.*.local`
+- **Reason**: Prevent accidental commit of secrets while documenting required env vars
+
+### 17. Subject domain and infrastructure layers
+
+- **Decision**: Implement `Subject` entity with tree structure (parentId, level, order, metadata), `SubjectRepository` interface with `getTree()`, `GetSubjectTree` use case, factory function, and `MockSubjectRepository` with hierarchical sample data
+- **Reason**: Establishes the full vertical slice for subjects following clean architecture — from domain entity through infrastructure, ready for Supabase swap later
+
+### 18. Additional shadcn UI components
+
+- **Decision**: Add Avatar, Badge, and Tabs components from shadcn/ui registry
+- **Reason**: Required by the overview page (member avatars, role badges, tabbed content views)
+
+### 19. App layout and navigation
+
+- **Decision**: Create `AppLayout` (Outlet-based layout), `Navbar` (brand + navigation links), and `Footer` components
+- **Reason**: Provides consistent app shell for all routes
+
+### 20. Client-side routing with react-router-dom
+
+- **Decision**: Use `createBrowserRouter` with routes: `/login`, `/content-tree`, `/overview`, default redirect to `/login`
+- **Layout**: All routes wrapped in `AppLayout` via nested route with `<Outlet />`
+- **Entry point**: `App.tsx` renders `<RouterProvider>`, `main.tsx` wraps with `<AppProvider>`
+- **Reason**: Enables SPA navigation; layout route pattern keeps header/footer consistent
+
+### 21. Login page
+
+- **Decision**: Static login form with email/password inputs, password visibility toggle, and sign-up link
+- **UI**: Uses Card, Input, Button, Typography components; Lucide icons for input decorators
+- **Reason**: First screen users see; form wiring to auth hooks will come when backend is connected
+
+### 22. Content tree page with @xyflow/react
+
+- **Decision**: Interactive tree visualization using ReactFlow with custom `SubjectNode` component, hierarchical layout algorithm, and zoom/pan controls
+- **Layout algorithm**: Recursive `layoutSubtree` divides available space by `SCALE_FACTOR` for each level
+- **Reason**: Core feature — visual subject map showing hierarchical relationships
+
+### 23. Overview page with members and subjects tabs
+
+- **Decision**: Tabbed page showing study group members and subjects with search, stat cards, and mock data
+- **Components**: `StatCard`, `SubjectCard`, `MemberCard` in `features/overview/`
+- **Mock data**: Inline in `pages/overview/mock-data.ts` with typed `Member` and `Subject` definitions
+- **Reason**: Dashboard-style view for group collaboration; mock data enables UI development before backend

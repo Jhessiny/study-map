@@ -2,19 +2,23 @@
 
 ## Overview
 
-Services follow **Clean Architecture** with strict layer separation. Each service is defined as a domain repository interface, implemented in the infrastructure layer using Supabase, wired via factory functions, and consumed through React Query hooks.
+Services follow **Clean Architecture** with strict layer separation. Each service is defined as a domain repository interface, implemented in the infrastructure layer using Supabase, wired in the `main/` composition root via React Context, and consumed through React Query hooks.
 
 ```
 domain/repositories/         Interface (contract)
         |
 infrastructure/repositories/ Supabase implementation
         |
-infrastructure/factories/    Factory function (manual wiring)
+infrastructure/factories/    Factory function (creates concrete repos)
         |
-presentation/hooks/          React Query hook (consumption)
+main/providers/              Composition root (wires repos → use cases → context)
+        |
+presentation/hooks/          React Query hook (consumes use cases from context)
 ```
 
-Data flows inward: presentation depends on infrastructure depends on domain. The domain layer has **zero** external dependencies.
+The `main/` layer is the **composition root** — the only place that imports from both infrastructure and application to wire everything together. It provides use case instances to presentation via React Context.
+
+Presentation hooks depend only on application-layer types (use case classes) and `main/contexts/` (to read context). They never import from `infrastructure/` directly.
 
 ## Base Types
 
@@ -170,27 +174,27 @@ src/domain/repositories/
 ```
 
 ```ts
-// src/domain/repositories/concept-repository.ts
+// src/domain/repositories/subject-repository.ts
 import type { Response } from '@/shared/types/response'
-import type { Concept } from '@/domain/entities/concept'
+import type { Subject } from '@/domain/entities/subject'
 
-export interface ConceptRepository {
-  findAll(): Promise<Response<Concept[]>>
-  findById(id: string): Promise<Response<Concept>>
-  create(params: CreateConceptParams): Promise<Response<Concept>>
-  update(id: string, params: UpdateConceptParams): Promise<Response<Concept>>
+export interface SubjectRepository {
+  findAll(): Promise<Response<Subject[]>>
+  findById(id: string): Promise<Response<Subject>>
+  create(params: CreateSubjectParams): Promise<Response<Subject>>
+  update(id: string, params: UpdateSubjectParams): Promise<Response<Subject>>
   remove(id: string): Promise<Response<void>>
 }
 
-export type CreateConceptParams = {
+export type CreateSubjectParams = {
   title: string
   description?: string
 }
 
-export type UpdateConceptParams = Partial<CreateConceptParams>
+export type UpdateSubjectParams = Partial<CreateSubjectParams>
 ```
 
-Naming convention: `<Entity>Repository` with standard CRUD method names (`findAll`, `findById`, `create`, `update`, `remove`).
+Naming convention: `<Entity>Repository` with standard CRUD method names (`findAll`, `findById`, `create`, `update`, `remove`). The primary content entity is `Subject` (previously called "concept").
 
 ## Infrastructure Layer — Supabase Implementations
 
@@ -201,27 +205,27 @@ src/infrastructure/repositories/
 ```
 
 ```ts
-// src/infrastructure/repositories/supabase-concept-repository.ts
+// src/infrastructure/repositories/supabase-subject-repository.ts
 import { supabase } from '@/infrastructure/api/supabase-client'
 import { mapPostgrestError } from '@/infrastructure/api/map-postgrest-error'
 import { error, success } from '@/shared/utils/either'
 import type {
-  ConceptRepository,
-  CreateConceptParams
-} from '@/domain/repositories/concept-repository'
-import type { Concept } from '@/domain/entities/concept'
+  SubjectRepository,
+  CreateSubjectParams
+} from '@/domain/repositories/subject-repository'
+import type { Subject } from '@/domain/entities/subject'
 
-export class SupabaseConceptRepository implements ConceptRepository {
-  async findAll(): Promise<Response<Concept[]>> {
-    const { data, error: err } = await supabase.from('concepts').select('*')
+export class SupabaseSubjectRepository implements SubjectRepository {
+  async findAll(): Promise<Response<Subject[]>> {
+    const { data, error: err } = await supabase.from('subjects').select('*')
 
     if (err) return error(mapPostgrestError(err))
     return success(data)
   }
 
-  async findById(id: string): Promise<Response<Concept>> {
+  async findById(id: string): Promise<Response<Subject>> {
     const { data, error: err } = await supabase
-      .from('concepts')
+      .from('subjects')
       .select('*')
       .eq('id', id)
       .single()
@@ -230,9 +234,9 @@ export class SupabaseConceptRepository implements ConceptRepository {
     return success(data)
   }
 
-  async create(params: CreateConceptParams): Promise<Response<Concept>> {
+  async create(params: CreateSubjectParams): Promise<Response<Subject>> {
     const { data, error: err } = await supabase
-      .from('concepts')
+      .from('subjects')
       .insert(params)
       .select()
       .single()
@@ -247,23 +251,96 @@ export class SupabaseConceptRepository implements ConceptRepository {
 
 ### Factory Functions
 
-Factory functions wire implementations to their interfaces. They live in `infrastructure/factories/` and are the **only place** that knows about concrete classes.
+Factory functions create concrete repository instances. They live in `infrastructure/factories/` and are consumed by the `main/` composition root.
 
 ```
 src/infrastructure/factories/
 ```
 
 ```ts
-// src/infrastructure/factories/make-concept-repository.ts
-import type { ConceptRepository } from '@/domain/repositories/concept-repository'
-import { SupabaseConceptRepository } from '@/infrastructure/repositories/supabase-concept-repository'
+// src/infrastructure/factories/make-subject-repository.ts
+import type { SubjectRepository } from '@/domain/repositories/subject-repository'
+import { SupabaseSubjectRepository } from '@/infrastructure/repositories/supabase-subject-repository'
 
-export const makeConceptRepository = (): ConceptRepository => {
-  return new SupabaseConceptRepository()
+export const makeSubjectRepository = (): SubjectRepository => {
+  return new SupabaseSubjectRepository()
 }
 ```
 
 Factories are intentionally simple — no IoC container, no decorators. If a repository gains dependencies later (e.g. a cache layer), the factory is the single place to wire them.
+
+## Composition Root (`main/`)
+
+The `main/` layer wires infrastructure (concrete repos) with application (use cases) and provides them to presentation via React Context. This is the **only layer** that imports from both infrastructure and application.
+
+### Context
+
+Each service domain defines a context holding its use case instances:
+
+```
+src/main/contexts/auth-context.ts
+```
+
+```ts
+import { createContext } from 'react'
+
+import type {
+  GetSession,
+  SignIn,
+  SignUp,
+  SignOut
+} from '@/application/use-cases/auth'
+
+export type AuthUseCases = {
+  getSession: GetSession
+  signIn: SignIn
+  signUp: SignUp
+  signOut: SignOut
+}
+
+export const AuthContext = createContext<AuthUseCases | null>(null)
+```
+
+### Provider
+
+Providers create the repos and use cases, then provide them via context:
+
+```
+src/main/providers/auth-provider.tsx
+```
+
+```ts
+import { GetSession, SignIn, SignUp, SignOut } from '@/application/use-cases/auth'
+import { makeAuthRepository } from '@/infrastructure/factories/make-auth-repository'
+import { AuthContext } from '@/main/contexts/auth-context'
+
+const repository = makeAuthRepository()
+
+const useCases = {
+  getSession: new GetSession(repository),
+  signIn: new SignIn(repository),
+  signUp: new SignUp(repository),
+  signOut: new SignOut(repository),
+}
+
+export const AuthProvider = ({ children }) => (
+  <AuthContext value={useCases}>{children}</AuthContext>
+)
+```
+
+### App Provider
+
+`AppProvider` composes all domain providers. This is what `main.tsx` renders.
+
+```
+src/main/providers/app-provider.tsx
+```
+
+```ts
+export const AppProvider = ({ children }) => (
+  <AuthProvider>{children}</AuthProvider>
+)
+```
 
 ## React Query Integration
 
@@ -276,9 +353,9 @@ src/presentation/hooks/query-keys.ts
 ```
 
 ```ts
-export const conceptKeys = {
-  all: ['concepts'] as const,
-  detail: (id: string) => ['concepts', id] as const
+export const subjectKeys = {
+  all: ['subjects'] as const,
+  detail: (id: string) => ['subjects', id] as const
 }
 ```
 
@@ -306,48 +383,54 @@ export const queryAdapter = async <T>(
 
 ### Custom Hooks
 
-Each entity gets custom hooks that combine the factory + query adapter + React Query.
+Each entity gets custom hooks that consume use cases from context via a `useXUseCases()` helper, then combine with query adapter + React Query.
 
 ```
 src/presentation/hooks/
 ```
 
 ```ts
-// src/presentation/hooks/use-concepts.ts
+// src/presentation/hooks/use-auth.ts
+import { useContext } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 
+import { AuthContext } from '@/main/contexts/auth-context'
 import { queryAdapter } from '@/shared/utils/query-adapter'
-import { makeConceptRepository } from '@/infrastructure/factories/make-concept-repository'
-import { conceptKeys } from '@/presentation/hooks/query-keys'
+import { authKeys } from '@/presentation/hooks/query-keys'
 
-const repository = makeConceptRepository()
+const useAuthUseCases = () => {
+  const context = useContext(AuthContext)
 
-export const useConcepts = () => {
+  if (!context) {
+    throw new Error('useAuthUseCases must be used within an AuthProvider')
+  }
+
+  return context
+}
+
+export const useSession = () => {
+  const { getSession } = useAuthUseCases()
+
   return useQuery({
-    queryKey: conceptKeys.all,
-    queryFn: () => queryAdapter(repository.findAll())
+    queryKey: authKeys.session,
+    queryFn: () => queryAdapter(getSession.execute())
   })
 }
 
-export const useConcept = (id: string) => {
-  return useQuery({
-    queryKey: conceptKeys.detail(id),
-    queryFn: () => queryAdapter(repository.findById(id))
-  })
-}
-
-export const useCreateConcept = () => {
+export const useSignIn = () => {
+  const { signIn } = useAuthUseCases()
   const queryClient = useQueryClient()
 
   return useMutation({
-    mutationFn: (params: CreateConceptParams) =>
-      queryAdapter(repository.create(params)),
+    mutationFn: (params: SignInParams) => queryAdapter(signIn.execute(params)),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: conceptKeys.all })
+      queryClient.invalidateQueries({ queryKey: authKeys.session })
     }
   })
 }
 ```
+
+Hooks import only from `@/main/contexts/` (to read context), `@/domain/` (param types), `@/shared/` (utilities), and `@/presentation/` (query keys). They **never** import from `@/infrastructure/`.
 
 Error handling in components uses `error` from the query result, which will be a `DomainError` instance thrown by the adapter.
 
@@ -413,7 +496,7 @@ src/domain/entities/<entity>.ts
 ```ts
 export type Resource = {
   id: string
-  conceptId: string
+  subjectId: string
   title: string
   url: string
   type: 'article' | 'video' | 'book'
@@ -432,13 +515,13 @@ import type { Response } from '@/shared/types/response'
 import type { Resource } from '@/domain/entities/resource'
 
 export interface ResourceRepository {
-  findByConceptId(conceptId: string): Promise<Response<Resource[]>>
+  findBySubjectId(subjectId: string): Promise<Response<Resource[]>>
   create(params: CreateResourceParams): Promise<Response<Resource>>
   remove(id: string): Promise<Response<void>>
 }
 
 export type CreateResourceParams = {
-  conceptId: string
+  subjectId: string
   title: string
   url: string
   type: 'article' | 'video' | 'book'
@@ -461,11 +544,11 @@ import type {
 } from '@/domain/repositories/resource-repository'
 
 export class SupabaseResourceRepository implements ResourceRepository {
-  async findByConceptId(conceptId: string): Promise<Response<Resource[]>> {
+  async findBySubjectId(subjectId: string): Promise<Response<Resource[]>> {
     const { data, error: err } = await supabase
       .from('resources')
       .select('*')
-      .eq('concept_id', conceptId)
+      .eq('subject_id', subjectId)
 
     if (err) return error(mapPostgrestError(err))
     return success(data)
@@ -475,7 +558,7 @@ export class SupabaseResourceRepository implements ResourceRepository {
     const { data, error: err } = await supabase
       .from('resources')
       .insert({
-        concept_id: params.conceptId,
+        subject_id: params.subjectId,
         title: params.title,
         url: params.url,
         type: params.type
@@ -514,61 +597,131 @@ export const makeResourceRepository = (): ResourceRepository => {
 }
 ```
 
-### 5. Create query keys and hooks
+### 5. Create context and provider in `main/`
+
+```
+src/main/contexts/<entity>-context.ts
+src/main/providers/<entity>-provider.tsx
+```
+
+```ts
+// src/main/contexts/resource-context.ts
+import { createContext } from 'react'
+
+import type {
+  FindResources,
+  CreateResource,
+  RemoveResource
+} from '@/application/use-cases/resource'
+
+export type ResourceUseCases = {
+  findResources: FindResources
+  createResource: CreateResource
+  removeResource: RemoveResource
+}
+
+export const ResourceContext = createContext<ResourceUseCases | null>(null)
+```
+
+```ts
+// src/main/providers/resource-provider.tsx
+import { FindResources, CreateResource, RemoveResource } from '@/application/use-cases/resource'
+import { makeResourceRepository } from '@/infrastructure/factories/make-resource-repository'
+import { ResourceContext } from '@/main/contexts/resource-context'
+
+const repository = makeResourceRepository()
+
+const useCases = {
+  findResources: new FindResources(repository),
+  createResource: new CreateResource(repository),
+  removeResource: new RemoveResource(repository),
+}
+
+export const ResourceProvider = ({ children }) => (
+  <ResourceContext value={useCases}>{children}</ResourceContext>
+)
+```
+
+Then add the new provider to `AppProvider`:
+
+```ts
+// src/main/providers/app-provider.tsx
+export const AppProvider = ({ children }) => (
+  <AuthProvider>
+    <ResourceProvider>{children}</ResourceProvider>
+  </AuthProvider>
+)
+```
+
+### 6. Create query keys and hooks
 
 ```
 src/presentation/hooks/use-<entity>.ts
 ```
 
 ```ts
+import { useContext } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 
+import { ResourceContext } from '@/main/contexts/resource-context'
 import { queryAdapter } from '@/shared/utils/query-adapter'
-import { makeResourceRepository } from '@/infrastructure/factories/make-resource-repository'
 
-const repository = makeResourceRepository()
+const useResourceUseCases = () => {
+  const context = useContext(ResourceContext)
 
-export const resourceKeys = {
-  byConcept: (conceptId: string) => ['resources', conceptId] as const
+  if (!context) {
+    throw new Error(
+      'useResourceUseCases must be used within a ResourceProvider'
+    )
+  }
+
+  return context
 }
 
-export const useResources = (conceptId: string) => {
+export const resourceKeys = {
+  bySubject: (subjectId: string) => ['resources', subjectId] as const
+}
+
+export const useResources = (subjectId: string) => {
+  const { findResources } = useResourceUseCases()
+
   return useQuery({
-    queryKey: resourceKeys.byConcept(conceptId),
-    queryFn: () => queryAdapter(repository.findByConceptId(conceptId))
+    queryKey: resourceKeys.bySubject(subjectId),
+    queryFn: () => queryAdapter(findResources.execute(subjectId))
   })
 }
 
-export const useCreateResource = (conceptId: string) => {
+export const useCreateResource = (subjectId: string) => {
+  const { createResource } = useResourceUseCases()
   const queryClient = useQueryClient()
 
   return useMutation({
     mutationFn: (params: CreateResourceParams) =>
-      queryAdapter(repository.create(params)),
+      queryAdapter(createResource.execute(params)),
     onSuccess: () => {
       queryClient.invalidateQueries({
-        queryKey: resourceKeys.byConcept(conceptId)
+        queryKey: resourceKeys.bySubject(subjectId)
       })
     }
   })
 }
 ```
 
-### 6. Consume in a component
+### 7. Consume in a component
 
 ```tsx
-import { useConcepts } from '@/presentation/hooks/use-concepts'
+import { useSubjects } from '@/presentation/hooks/use-subjects'
 
-export const ConceptList = () => {
-  const { data: concepts, isLoading, error } = useConcepts()
+export const SubjectList = () => {
+  const { data: subjects, isLoading, error } = useSubjects()
 
   if (isLoading) return <p>Loading...</p>
   if (error) return <p>Error: {error.message}</p>
 
   return (
     <ul>
-      {concepts.map((c) => (
-        <li key={c.id}>{c.title}</li>
+      {subjects.map((s) => (
+        <li key={s.id}>{s.title}</li>
       ))}
     </ul>
   )
@@ -580,13 +733,13 @@ export const ConceptList = () => {
 ```
 src/
 ├── domain/
-│   ├── entities/                    # Type definitions (Concept, Resource, Question, User)
+│   ├── entities/                    # Type definitions (Subject, Resource, Question, User)
 │   └── repositories/                # Repository interfaces (contracts)
 │
 ├── application/
 │   └── use-cases/                   # Business logic orchestrating repositories
 │       ├── auth/
-│       ├── concept/
+│       ├── subject/
 │       ├── resource/
 │       └── question/
 │
@@ -596,11 +749,16 @@ src/
 │   ├── factories/                   # Factory functions (makeXRepository)
 │   └── storage/                     # Local storage adapters (if needed)
 │
+├── main/                            # Composition root (wires everything)
+│   ├── contexts/                    # React contexts holding use case instances
+│   └── providers/                   # Providers that wire repos → use cases → context
+│
 ├── presentation/
 │   ├── components/
 │   │   ├── ui/                      # Generic UI components
 │   │   ├── features/                # Feature-specific components
-│   │   │   ├── concept/
+│   │   │   ├── subject/
+│   │   │   ├── overview/
 │   │   │   ├── resource/
 │   │   │   └── question/
 │   │   └── layout/                  # Shell, nav, sidebar
@@ -618,16 +776,19 @@ src/
 ## Dependency Direction
 
 ```
-presentation  →  infrastructure  →  domain  ←  shared
-     |                |                         ↑
-     |                +-------------------------+
-     +------------------------------------------+
+main/ (composition root)
+  ├→ infrastructure/  →  domain/  ←  shared/
+  ├→ application/     →  domain/
+  └→ presentation/    →  main/contexts/  →  application/ (types only)
+                      →  domain/ (param types)
+                      →  shared/ (utilities)
 ```
 
 - **`domain/`** depends on **nothing** (only standard TypeScript types)
 - **`shared/`** depends on **nothing** (utilities and types used by all layers)
 - **`infrastructure/`** depends on `domain/` (implements its interfaces) and `shared/` (uses Either, errors)
 - **`application/`** depends on `domain/` (uses repository interfaces) and `shared/`
-- **`presentation/`** depends on `infrastructure/` (via factories), `domain/` (entity types), and `shared/`
+- **`main/`** depends on `infrastructure/` (factories), `application/` (use cases), and `shared/` — this is the **composition root**
+- **`presentation/`** depends on `main/contexts/` (to read use cases from context), `domain/` (param types), and `shared/` — **never** imports from `infrastructure/` directly
 
-Factory functions in `infrastructure/factories/` are the **composition root** — the only place where concrete implementations are coupled to interfaces. Presentation hooks import factories, never concrete repository classes directly.
+The `main/` layer providers are the composition root — the only place where concrete implementations are coupled to use cases and provided to the component tree.
