@@ -30,10 +30,10 @@ StudyFlow provides a visual knowledge hierarchy where students can:
 
 ### Phase 1: Core (Weeks 1-3)
 
-- [ ] Visual knowledge map with 3-level hierarchy
+- [x] Visual knowledge map with zoom-based navigation (Arc view)
 - [ ] Concept CRUD operations
 - [ ] User authentication & profiles
-- [ ] Basic navigation and routing
+- [x] Basic navigation and routing
 
 ### Phase 2: Content (Weeks 4-5)
 
@@ -62,7 +62,7 @@ StudyFlow provides a visual knowledge hierarchy where students can:
 
 **Frontend**
 
-- React 18 + TypeScript
+- React 19 + TypeScript
 - Vite (build tool)
 - React Router v6
 - Tailwind CSS + shadcn/ui
@@ -108,7 +108,7 @@ presentation/    → React components and UI
 
 ```bash
 # Clone the repository
-git clone https://github.com/yourusername/studyflow.git
+git clone https://github.com/Jhessiny/studyflow.git
 cd studyflow
 
 # Install dependencies
@@ -252,8 +252,8 @@ MIT License - see [LICENSE](./LICENSE) file for details
 **Your Name**
 
 - Portfolio: [yourportfolio.com](https://yourportfolio.com)
-- LinkedIn: [linkedin.com/in/yourprofile](https://linkedin.com/in/yourprofile)
-- GitHub: [@yourusername](https://github.com/yourusername)
+- LinkedIn: [linkedin.com/in//jhessiny-mattos](https://linkedin.com/in//jhessiny-mattos)
+- GitHub: [@Jhessiny](https://github.com/Jhessiny)
 
 ---
 

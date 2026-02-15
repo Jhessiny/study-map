@@ -156,3 +156,13 @@
 - **Components**: `StatCard`, `SubjectCard`, `MemberCard` in `features/overview/`
 - **Mock data**: Inline in `pages/overview/mock-data.ts` with typed `Member` and `Subject` definitions
 - **Reason**: Dashboard-style view for group collaboration; mock data enables UI development before backend
+
+### 24. Arc zoom navigation (replaces content tree)
+
+- **Decision**: Replace the static content tree with an interactive zoom-based subject tree ("Arc view") using React Flow. The tree renders a 5-8-8-8 hierarchy (~2,925 subjects) with viewport virtualization — only nodes within the visible zoom range are materialized (~200-400 in DOM at any time)
+- **Structure**: `pages/arc/` with types, mock data, helpers (layout, build-node), hooks (use-zoom-level, use-visible-nodes), and node components (subject-card, subject-article, topic-label, arc-header)
+- **Layout**: Precomputed `LAYOUTS[]` array with `BASE_SIZE = 35520`, each child level ~1/10th of parent. Threshold-based level detection maps zoom to `[minLevel, maxLevel]` range
+- **Node types**: `subjectCard` (image/icon + gradient + title), `subjectArticle` (detail card with topics), `topicLabel` (large uppercase category), `arcHeader` (centered title + subtitle)
+- **Icons**: Lucide icon names stored as kebab-case strings, converted to PascalCase at build-node time for type-safe lookup
+- **Mock data**: Computer Science root with 5 broad categories (Foundations & Theory, Systems & Infrastructure, AI, Software Engineering, Security & Privacy), 8 children per node, auto-generated level 3
+- **Reason**: Zoom-based navigation lets users explore a deep subject hierarchy without pagination or drilling — zoom in to see children, zoom out to see the big picture. Virtualization keeps DOM size manageable regardless of tree depth
